@@ -54,27 +54,6 @@ class Opt:
     def err_rate(f,X,w,Y,threshold=0.5):
         return 1.0 - sum(threshold + f(X,w) > Y) / len(Y)
 
-    def gd(Model,X,Y,w,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
-        assert X.shape[0]==Y.shape[0],'X Y shape diff'
-        assert X.shape[1]==w.shape[0],'X w shape diff'
-        print('iter\tloss')
-        cnt = 0
-        while(cnt < max_iter):
-            loss = Model.loss(X,w,Y)
-            grad = Model.grad(X,w,Y)
-            
-            if cnt % print_iter == 0: 
-                print('#%d\t%.2f' % (cnt, loss))
-            cnt += 1
-            
-            if loss < stop_err:
-                print('#%d\t%.2f w%s' % (cnt, loss, w))
-                if classification:
-                    print('train error rate:%.2f' % Opt.err_rate(Model.f, X, w, Y, threshold=0.5))
-                return w
-            else:
-                w = w - grad * learn_rate
-
     def sgd(Model,X,Y,w,batch,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
         assert X.shape[0]==Y.shape[0],'X Y shape diff'
         assert X.shape[1]==w.shape[0],'X w shape diff'
@@ -100,6 +79,9 @@ class Opt:
                 return w
             else:
                 w = w - grad * learn_rate
+                
+    def gd(Model,X,Y,w,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
+        return sgd(Model,X,Y,w,batch=X.shape[0],learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True)
 
 points = []
 points += [[0.1 * i * random(), 0.5, 1] for i in range(100)]
