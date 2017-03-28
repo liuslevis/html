@@ -25,7 +25,7 @@ class LR(Model):
         return abs(sum(Y.dot(X.dot(w)) - np.log(1+np.exp(X.dot(w))))) + np.linalg.norm(w, 2)
     # return w.shape array
     def grad(X,w,Y):
-        grad = np.zeros(w.shape)
+        grad = np.zeros(w.shape, dtype=np.float64)
         for i in range(X.shape[0]):
             x = X[i]
             y = Y[i]
@@ -57,17 +57,23 @@ class Opt:
     def sgd(Model,X,Y,w,batch,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
         assert X.shape[0]==Y.shape[0],'X Y shape diff'
         assert X.shape[1]==w.shape[0],'X w shape diff'
-        assert batch < X.shape[0]
+        assert batch <= X.shape[0]
         print('iter\tloss')
         cnt = 0
         n = X.shape[0]
         while(cnt < max_iter):
-            sel = np.random.random(n) > 0.5
-            batchX = X[sel]
-            batchY = Y[sel]
-            loss = Model.loss(batchX,w,batchY)
-            grad = Model.grad(batchX,w,batchY)
-            
+            loss = None
+            grad = None
+            if batch < n:
+                selIdx = np.random.choice(n, batch, replace=False)
+                batchX = X[selIdx,:]
+                batchY = Y[selIdx]
+                loss = Model.loss(batchX,w,batchY)
+                grad = Model.grad(batchX,w,batchY)
+            else:
+                loss = Model.loss(X,w,Y)
+                grad = Model.grad(X,w,Y)
+
             if cnt % print_iter == 0: 
                 print('#%d\t%.2f' % (cnt, loss))
             cnt += 1
@@ -79,9 +85,9 @@ class Opt:
                 return w
             else:
                 w = w - grad * learn_rate
-                
+
     def gd(Model,X,Y,w,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
-        return sgd(Model,X,Y,w,batch=X.shape[0],learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True)
+        return Opt.sgd(Model,X,Y,w,X.shape[0], learn_rate,stop_err, max_iter, print_iter, classification)
 
 points = []
 points += [[0.1 * i * random(), 0.5, 1] for i in range(100)]
@@ -99,7 +105,7 @@ w = Opt.gd(LR,
     learn_rate=1e-7,
     stop_err=10,
     max_iter=10000,
-    print_iter=500,
+    print_iter=100,
     classification=True)
 
 print("\n========== Linear Regression SGD ==========")
@@ -107,7 +113,7 @@ w = Opt.sgd(LR,
     X=np.array(points),
     Y=np.array(labels),
     w=np.array([random(),random(),1]),
-    batch=10,
+    batch=20,
     learn_rate=1e-7,
     stop_err=10,
     max_iter=10000,
