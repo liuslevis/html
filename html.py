@@ -149,17 +149,17 @@ labels += [1 for i in range(100)]
 def main():
     X,Y,w = Data.load_iris_X_Y_w()
 
-    # print("\n========== Linear Regression Newton ==========")
-    # w = Opt.newton(LR,
-    #     X=X,
-    #     Y=Y,
-    #     w=w,
-    #     learn_rate=1e-3,
-    #     stop_err=0.05,
-    #     max_iter=100,
-    #     print_iter=1,
-    #     classification=True)
-    # return 
+    print("\n========== Linear Regression Newton ==========")
+    w = Opt.newton(LR,
+        X=X,
+        Y=Y,
+        w=w,
+        learn_rate=1e-3,
+        stop_err=0.05,
+        max_iter=100,
+        print_iter=1,
+        classification=True)
+    return 
 
     print("\n========== Linear Regression GD ==========")
     w = Opt.gd(LR,
