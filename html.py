@@ -25,12 +25,16 @@ class LR(Model):
         return abs(sum(Y.dot(X.dot(w)) - np.log(1+np.exp(X.dot(w))))) + np.linalg.norm(w, 2)
     # return w.shape array
     def grad(X,w,Y):
-        grad = np.zeros(w.shape, dtype=np.float64)
-        for i in range(X.shape[0]):
-            x = X[i]
-            y = Y[i]
-            grad += y * x - 1 / (1 + np.exp(x * w)) * x
-        return grad + 0.5 * w
+        # grad = np.zeros(w.shape, dtype=np.float64)
+        # for i in range(X.shape[0]):
+        #     x = X[i]
+        #     y = Y[i]
+        #     grad += y * x - 1 / (1 + np.exp(x * w)) * x
+        # return grad + 0.5 * w
+        # Shorter version
+        pi = LR.f(X,w)
+        return np.ndarray.transpose((sum(np.ndarray.transpose(np.ndarray.transpose(X) * (Y - pi)))))
+
     def hessian(X,w,Y):
         pass
 
@@ -84,10 +88,21 @@ class Opt:
                     print('train error rate:%.2f' % Opt.err_rate(Model.f, X, w, Y, threshold=0.5))
                 return w
             else:
+                #print('grad w', grad.shape, w.shape)
                 w = w - grad * learn_rate
 
     def gd(Model,X,Y,w,learn_rate=0.1,stop_err=0.1, max_iter=20, print_iter=10, classification=True):
-        return Opt.sgd(Model,X,Y,w,X.shape[0], learn_rate,stop_err, max_iter, print_iter, classification)
+        batch = X.shape[0]
+        return Opt.sgd(Model,X,Y,w,batch, learn_rate,stop_err, max_iter, print_iter, classification)
+
+    def newton(Model,X,Y,w,learn_rate,stop_err,max_iter=20,print_iter=20,classification=True):
+
+        L = Model.loss(w)
+        g = Model.grad(w)
+        H = Model.hessian(w)
+        H_inv = np.linalg.inv(H)
+        w = w - H_inv.dot(g)
+        pass
 
 points = []
 points += [[0.1 * i * random(), 0.5, 1] for i in range(100)]
