@@ -1,5 +1,6 @@
 from math import *
 import numpy as np
+from numpy import transpose as trans
 from random import random
 # np.array([0,1,2]) * np.array([1,2,3])
 
@@ -33,10 +34,18 @@ class LR(Model):
         # return grad + 0.5 * w
         # Shorter version
         pi = LR.f(X,w)
-        return np.ndarray.transpose((sum(np.ndarray.transpose(np.ndarray.transpose(X) * (Y - pi)))))
+        return sum((X.T * (Y - pi)).T).T
 
     def hessian(X,w,Y):
-        pass
+        # calc W
+        n = X.shape[0]
+        W = np.zeros([n,n])
+        for i in range(n):
+            for j in range(n):
+                W[i][j] = LR.f(X[i],w) * (1 - LR.f(X[j],w))
+        print('rich', trans(X).shape, W.shape, X.shape)
+        H = - trans(X) * W * X
+        return H
 
 class LM(Model):
     # return scala
@@ -62,28 +71,31 @@ class Opt:
         assert X.shape[0]==Y.shape[0],'X Y shape diff'
         assert X.shape[1]==w.shape[0],'X w shape diff'
         assert batch <= X.shape[0]
-        print('iter\tloss')
+        print('iter\tloss\terror')
         cnt = 0
         n = X.shape[0]
         while(cnt < max_iter):
             loss = None
             grad = None
+            train_err = None
             if batch < n:
                 selIdx = np.random.choice(n, batch, replace=False)
                 batchX = X[selIdx,:]
                 batchY = Y[selIdx]
                 loss = Model.loss(batchX,w,batchY)
                 grad = Model.grad(batchX,w,batchY)
+                train_err = Opt.err_rate(Model.f, batchX, w, batchY, threshold=0.5)
             else:
                 loss = Model.loss(X,w,Y)
                 grad = Model.grad(X,w,Y)
+                train_err = Opt.err_rate(Model.f, X, w, Y, threshold=0.5)
 
             if cnt % print_iter == 0: 
-                print('#%d\t%.2f' % (cnt, loss))
+                print('#%d\t%.2f\t%.2f' % (cnt, loss, train_err))
             cnt += 1
             
-            if loss < stop_err:
-                print('#%d\t%.2f w%s' % (cnt, loss, w))
+            if train_err < stop_err:
+                print('#%d\t%.2f\t w%s' % (cnt, train_err, w))
                 if classification:
                     print('train error rate:%.2f' % Opt.err_rate(Model.f, X, w, Y, threshold=0.5))
                 return w
@@ -96,12 +108,19 @@ class Opt:
         return Opt.sgd(Model,X,Y,w,batch, learn_rate,stop_err, max_iter, print_iter, classification)
 
     def newton(Model,X,Y,w,learn_rate,stop_err,max_iter=20,print_iter=20,classification=True):
+        cnt = 0
+        while(cnt < max_iter):
+            loss = Model.loss(X,w,Y)
+            g = Model.grad(X,w,Y)
+            H = Model.hessian(X,w,Y)
+            H_inv = np.linalg.inv(H)
+            w = w - H_inv.dot(g)
 
-        L = Model.loss(w)
-        g = Model.grad(w)
-        H = Model.hessian(w)
-        H_inv = np.linalg.inv(H)
-        w = w - H_inv.dot(g)
+            print('iter\tloss')
+            if cnt % print_iter:
+                print('#%d\t%.2f' % (cnt, loss))
+            if loss < stop_err:
+                print('train error rate:%.2f' % Opt.err_rate(Model.f, X, w, Y, threshold=0.5))
         pass
 
 points = []
@@ -112,36 +131,53 @@ labels = []
 labels += [0 for i in range(100)]
 labels += [1 for i in range(100)]
 
-print("\n========== Linear Regression GD ==========")
-w = Opt.gd(LR,
-    X=np.array(points),
-    Y=np.array(labels),
-    w=np.array([random(),random(),1]),
-    learn_rate=1e-7,
-    stop_err=10,
-    max_iter=10000,
-    print_iter=100,
-    classification=True)
+def main():
 
-print("\n========== Linear Regression SGD ==========")
-w = Opt.sgd(LR,
-    X=np.array(points),
-    Y=np.array(labels),
-    w=np.array([random(),random(),1]),
-    batch=20,
-    learn_rate=1e-7,
-    stop_err=10,
-    max_iter=10000,
-    print_iter=500,
-    classification=True)
+    # print("\n========== Linear Regression Newton ==========")
+    # w = Opt.newton(LR,
+    #     X=np.array(points),
+    #     Y=np.array(labels),
+    #     w=np.array([random(),random(),1]),
+    #     learn_rate=1e-4,
+    #     stop_err=10,
+    #     max_iter=100,
+    #     print_iter=5,
+    #     classification=True)
+    # return 
 
-print("\n========== Linear Models ==========")
-w = Opt.gd(LM,
-    X=np.array([[0.1,0.2,1],[0.3,0.4,1],[0.5,0.6,1], [0.6,0.7,1]]),
-    Y=np.array([0.1, 0.1, 0.2, 0.3]),
-    w=np.array([5,10,10]),
-    learn_rate=0.01,
-    stop_err=1,
-    max_iter=1000,
-    print_iter=50,
-    classification=False)
+    print("\n========== Linear Regression GD ==========")
+    w = Opt.gd(LR,
+        X=np.array(points),
+        Y=np.array(labels),
+        w=np.array([random(),random(),1]),
+        learn_rate=1e-7,
+        stop_err=0.05,
+        max_iter=10000,
+        print_iter=500,
+        classification=True)
+
+    print("\n========== Linear Regression SGD ==========")
+    w = Opt.sgd(LR,
+        X=np.array(points),
+        Y=np.array(labels),
+        w=np.array([random(),random(),1]),
+        batch=50,
+        learn_rate=1e-7,
+        stop_err=0.05,
+        max_iter=10000,
+        print_iter=500,
+        classification=True)
+
+    print("\n========== Linear Models ==========")
+    w = Opt.gd(LM,
+        X=np.array([[0.1,0.2,1],[0.3,0.4,1],[0.5,0.6,1], [0.6,0.7,1]]),
+        Y=np.array([0.1, 0.1, 0.2, 0.3]),
+        w=np.array([5,10,10]),
+        learn_rate=0.01,
+        stop_err=0.1,
+        max_iter=1000,
+        print_iter=50,
+        classification=False)
+
+if __name__ == '__main__':
+    main()

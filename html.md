@@ -501,6 +501,8 @@ W_{ij} = \pi(x_i; w)(1 - \pi(x_j; w))\\
 \pi_i = \pi(x_i; w)
 $$
 
+[ref](http://sites.stat.psu.edu/~jiali/course/stat597e/notes2/logit.pdf)
+
 ### 用法
 
 输入特征相互独立 (descrete)
