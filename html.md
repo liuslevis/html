@@ -1676,6 +1676,14 @@ $$
 
 ![opt-update-rule](http://wx1.sinaimg.cn/large/62caff97ly1fdszm10lqjj20c70dg3z5.jpg)
 
+[gif demo](http://3.bp.blogspot.com/-nrtJPrdBWuE/VPmIB46F2aI/AAAAAAAACCw/vaE_B0SVy5k/s1600/Long%2BValley%2B-%2BImgur.gif), SGD, Momentum, NAG 花更多时间跳出对称区域
+
+如何选择？
+
+* 如果数据稀疏，或者训练深度神经网络，用 adative learning-rate methods，不需要手动调整学习率，超参数默认值 (0.9) 很容易达到较好的效果
+
+* Adam 可能是较好的选择，[Kingma](https://arxiv.org/pdf/1412.6980.pdf) 指出 bias-correction 的特性帮助 Adam 稍微优于 RMSProp Adadelta
+
 ## 特征选取
 
 ### 自然语言
@@ -1694,14 +1702,11 @@ $$
 
 除了 SVD 以外还可以用上 [NMF](http://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Non-negative_matrix_factorization)
 
-
-
 ### 视觉
 
 预处理, 二值化、灰度、卷积、sobel边缘
 
 衡量美观、明暗、相似度的指标
-
 
 ### 组合特征
 
