@@ -1599,9 +1599,78 @@ Conjugate gradient, 可认为是梯度下降法和牛顿法的中间物, 希望�
 
 TODO
 
-### momentum
+### Momentum
 
-是共轭梯度方法的近似
+[An overview of gradient descent optimization algorithms](https://arxiv.org/pdf/1609.04747.pdf)
+
+为解决 SGD 在沟壑（有一维梯度值特别大）的 Z 字形游走问题，引入动量，减少 Z 字震荡
+
+$$
+\begin{align}
+v_t &= \gamma v_{t-1} + \eta g_t \\
+\theta &= \theta - v_t \\
+\gamma &\approx 0.9
+\end{align}
+$$
+
+### Adagrad
+
+使用了自适应技术来更新学习率：对变化[小|大]的参数进行更[大|小]的更新。epsilon 是一个用于抑制学习率产生变动率的常量。[ref](https://zhuanlan.zhihu.com/p/25950802)
+
+Dean 发现它改进 SGD 的鲁棒性，将其应用在大规模神经网络训练 [NIPS12](http://www.cs.toronto.edu/~ranzato/publications/DistBeliefNIPS2012_withAppendix.pdf)
+
+$$
+\begin{align} \\
+g_{t,i} &= \Delta_\theta J(\theta_i) \\
+\theta_{t+1, i} &= \theta_{t,i} - \eta \cdot g_{t,i} (SGD) \\ 
+\theta_{t+1,i} &= \theta_{t,i} - \frac{\eta}{\sqrt{G_{t,ii} + \epsilon}}\cdot g_{t,i}  (Adagrad) \\
+\theta_{t+1} &= \theta_{t} - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t \\
+\end{align}
+$$
+
+其中 $$G_t \in \mathbb{R}^{d \times d}$$  是对角矩阵，元素 $$i,i$$ 是 $$\theta_i$$ 从 $$t^{0}$$ 到 $$t^{i}$$ 的平方和
+
+Adagrad 有个缺点：随着迭代次数的增多，学习率项 $$\frac{\eta}{\sqrt{G_{t,ii} + \epsilon}}$$ 会急剧递减。Adadelta 和 RMSprop 尝试解决这个问题。
+
+### Adadelta
+
+是 Adagrad 的扩展，减少 Adagrad 快速下降的学习率。把 Adagrad 的梯度平方和 $$G_t$$ 限制在时间窗口内
+
+$$
+\Delta\theta_t = - \frac{\eta}{\sqrt{ E[g^2]_t + \epsilon}} * g_t \\
+E[g^2]_{t} = \gamma E[g^2]_{t-1} + (1-\gamma) g^2_t \\
+E[\Delta\theta^2]_t = \gamma E[\Delta\theta^2]_{t-1} + (1-\gamma) \Delta\theta_t^2 \\
+RMS[\Delta\theta]_t = \sqrt{E[\Delta\theta^2]_t + \epsilon} \\
+\Delta\theta_t = - \frac{RMS[\Delta\theta]_{t-1}}{RMS[g]_t} g_t \\
+\theta_{t+1}=\theta_{t} + \Delta\theta_t \\
+$$
+
+### RMSprop
+
+类似 Adadelta，解决 Adagrad 快速降低的学习率
+
+$$
+E[g^2]_t = 0.9 E[g^2]_{t-1} + 0.1 g_t^2 \\
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t} + \epsilon} g_t \\
+$$
+
+Hinton 建议 $$\gamma = 0.9, \eta=0.001$$ (Hinton's Lecture)[http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf]
+
+### Adam
+
+Adaptive Moment Estimation, 除了像 Adadelta RMSprop 存储之前迭代的快速下降的梯度平方信息 $$v_t$$，它还存储之前迭代的快速下降的梯度信息 $$m_t$$，类似 momentum
+
+$$
+\begin{align}
+m_t &= \beta_1 m_{t-1} + (1-\beta_1) g_t \\
+v_t &= \beta_2 v_{t-1} + (1-\beta_2) g_t^2 \\
+\hat m_t &= \frac{m_t}{1-\beta_1^t} \\
+\hat v_t &= \frac{v_t}{1-\beta_2^t} \\
+\theta_{t+1} &= \theta_t - \frac{\eta}{\sqrt{\hat v_t + \epsilon}} \\
+\end{align}
+$$
+
+其中，[ $$m_t$$ | $$v_t$$ ] 是第 [1|2] 个时刻的梯度估计 [the mean | uncenter variance]，也是 Adam 名字的由来
 
 ### 总结
 
@@ -1809,6 +1878,8 @@ $$
 [机器学习方法：回归（二）：稀疏与正则约束ridge regression，Lasso](http://blog.csdn.net/xbinworld/article/details/44276389)
 
 [理解L-BFGS算法](http://mlworks.cn/posts/introduction-to-l-bfgs/)
+
+[An overview of gradient descent optimization algorithms](https://arxiv.org/pdf/1609.04747.pdf)
 
 ## TODO
 
