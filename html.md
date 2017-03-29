@@ -1350,11 +1350,6 @@ $$
 \frac{\partial C}{\partial b_j^l}=\delta_j^l
 $$
 
-
-
-
-
-
 ### LeNet-5
 
 [Gradient-based learning applied to document recognition](yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf) Yan LeCun, 1998
@@ -1449,6 +1444,25 @@ $$
 Stochastic Gradient Descent
 
 每次迭代, 选取部分样本进行计算
+
+相对于梯度下降，loss 函数更加波动，能帮助函数跳入另一个局部最优解。
+
+### Nesterov 加速梯度法
+
+NAG [ref](http://www.dlworld.cn/XueXiSuanFa/2009.html)
+
+当一个小球从山谷上滚下的时候，盲目的沿着斜率方向前行，其效果并不令人满意。我们需要有一个更「聪明」的小球，它能够知道它再往哪里前行，并在知道斜率再度上升的时候减速
+
+NAG 是一种能给予梯度项上述「预测」功能的方法。我们用动量 $$\gamma v_{t-1}$$ 来移动参数 $$\theta$$，通过计算 $$\theta - \gamma v_{t-1}$$ 给我们一个对下个参数 $$\theta$$ 的估计
+
+NAG 的更新规则是
+
+$$
+\begin{align}
+v_t    &= \gamma v_{t-1} + \eta g(\theta - \gamma v_{t-1}) \\
+\theta &= \theta - v_t \\
+\end{align}
+$$
 
 ### 牛顿法
 
@@ -1672,6 +1686,21 @@ $$
 
 其中，[ $$m_t$$ | $$v_t$$ ] 是第 [1|2] 个时刻的梯度估计 [the mean | uncenter variance]，也是 Adam 名字的由来
 
+### SGD 技巧
+
+* shuffling training data
+* curriculumn learning [Bengio09](https://www.google.com.hk/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=0ahUKEwiDv6OEpfvSAhULuI8KHVLvA4AQFggaMAA&url=https%3a%2f%2fronan%2ecollobert%2ecom%2fpub%2fmatos%2f2009_curriculum_icml%2epdf&usg=AFQjCNHzOTR6LpxcMFsYwLi0Wfx-r0LvKg) 循序渐进学习
+* batch normalization
+* early stopping
+* gradient noise [Neelakantan](https://arxiv.org/pdf/1511.06807.pdf)
+
+$$
+\begin{align}
+g_{t,i}    &= g_{t,i} + N(0,\sigma_t^2) \\
+\sigma_t^2 &= \frac{\eta}{(1+t)^\gamma}
+\end{align}
+$$
+
 ### 总结
 
 ![opt-update-rule](http://wx1.sinaimg.cn/large/62caff97ly1fdszm10lqjj20c70dg3z5.jpg)
@@ -1681,8 +1710,8 @@ $$
 如何选择？
 
 * 如果数据稀疏，或者训练深度神经网络，用 adative learning-rate methods，不需要手动调整学习率，超参数默认值 (0.9) 很容易达到较好的效果
-
-* Adam 可能是较好的选择，[Kingma](https://arxiv.org/pdf/1412.6980.pdf) 指出 bias-correction 的特性帮助 Adam 稍微优于 RMSProp Adadelta
+* Adam 可能是较好的选择，[Kingma](https://arxiv.org/pdf/1412.6980.pdf) 指出 Adam 的 bias-correction 的特性帮助 Adam 稍微优于 RMSProp Adadelta
+* 有趣的是，很多最新的论文，都直接使用了（不带动量项的）Vanilla SGD 法，配合一个简单的学习率（退火）列表。这些 SGD 最终都能帮助他们找到一个最小值，但会花费远多于上述方法的时间。
 
 ## 特征选取
 
@@ -1842,7 +1871,7 @@ $$
 
 ### 逆矩阵
 
-如果 n 阶方形矩阵 $$A$$ 存在 $$B$$ 且 $$A \cdot B = B \cdot A = \I_n$$, 那么称 $$A$$ 是可逆的, $$B$$ 是 $$A$$ 的逆矩阵, 计作 $$A^{-1}$$. 若 $$A$$ 的逆矩阵存在, 称 $$A$$ 为非奇异方阵, 
+如果 n 阶方形矩阵 $$A$$ 存在 $$B$$ 且 $$A \cdot B = B \cdot A =I_n$$, 那么称 $$A$$ 是可逆的, $$B$$ 是 $$A$$ 的逆矩阵, 计作 $$A^{-1}$$. 若 $$A$$ 的逆矩阵存在, 称 $$A$$ 为非奇异方阵, 
 
 $$
 rank(A)=rank(B)=n \\
