@@ -1715,6 +1715,30 @@ $$
 
 ## 特征选取
 
+    Feature Engineering is the process of transforming raw data into features that better represent the underlying problem to the predictive models, resulting in improved model accuracy on unseen data. —— Jason Brownlee
+
+[特征工程简介](https://zr9558.com/2016/01/26/feature_engineering_introduction/)
+
+在使用线性模型如 LR, 特征构造十分重要. 构造过程为
+
+1. 任务的确定
+2. 数据的选择: 获取难易程度, 覆盖率, 准确率
+3. 预处理数据
+4. 特征构造: 
+  1. 标准化(统一单位)
+  2. 归一化
+        1. 线性（linearization）最大最小归一化
+        2. 对数（logarithm）归一化 $$f(x)=\log (1+x)$$
+        3. 双曲线归一化 $$f(x)=x/(x+1)$$
+        3. z-score 的归一化 $$(x-u)/\sigma$$
+  3. 离散化, 比方说通过等频率分割（Equal-Frequency）得到的特征比等区间分割（Equal-Interval）得到的特征具有更好的区分性. 一般流程是对特征做排序－> 选择合适的分割点－> 作出对整体的分割 －> 查看分割是否合理，是否能够达到停止条件
+  4. 二值化
+  5. 特征交叉, 比如特征 (女性, 八卦新闻点击率) $$\in (0,1)$$
+5. 特征选择
+    1. 过滤 (filter): 可以通过相关系数 (correlation coefficient) 来评估特征 X 和 Y 是否线性相关 $$\pho_{X,Y} = cov(X,Y)/(\sigma_X \sigma_Y) \in [-1,1]$$, 如果 $$\pho_{XY} > 0$$ 说明线性相关, 如果 $$\pho_{XY} < 0$$ 则是线性反相关, 如果 $$\pho_{XY} = 0$$ 也只是说明两个变量是线性无关的, 并不能推出它们之间是独立的.
+    2. 包装 (wrapper), 先选定一种评估模型的指标如 Area Under Curve / Mean Absolute Error/ Mean Square Error, 通过[前|后]项特征选择或者, 有[空|满]特征集开始, 每次[增加|剔除]一个能让模型提升最[快|慢]的特征. 或者用增 L 去 R 算法（Plus-L Minus-R Selection ($$L < R $$)
+    3. 嵌入 (embedding), 如 RF, Logistic Regression 的一些算法，可以参考 TG（Truncated Gradient Algorithm），FOBOS（Forward and Backward Splitting），RDA（Regularized Dual Averaging Algorithm）， FTRL（Follow-the-Regularized-Leader Algorithm） 算法 [Ad Click Prediction: a View from the Trenches](https://www.eecs.tufts.edu/~dsculley/papers/ad-click-prediction.pdf)
+
 ### 自然语言
 
 借助外部数据集训练模型, 如 [WordNet](http://link.zhihu.com/?target=https%3A//wordnet.princeton.edu/), [Reddit评论数据集](http://link.zhihu.com/?target=https%3A//www.kaggle.com/reddit/reddit-comments-may-2015)
