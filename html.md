@@ -1733,30 +1733,31 @@ $$
 4. 特征构造: 
     1. 标准化(统一单位)
     2. 归一化
-        1. 线性（linearization）最大最小归一化
-        2. 对数（logarithm）归一化 $$f(x)=\log (1+x)$$
-        3. 双曲线归一化 $$f(x)=x/(x+1)$$
-        4. z-score 的归一化 $$(x-u)/\sigma$$
-        5. 排序归一化
+        * 线性（linearization）最大最小归一化
+        * 对数（logarithm）归一化 $$f(x)=\log (1+x)$$
+        * 双曲线归一化 $$f(x)=x/(x+1)$$
+        * z-score 的归一化 $$(x-u)/\sigma$$
+        * 排序归一化
     3. 离散化, 比方说通过等频率分割（Equal-Frequency）得到的特征比等区间分割（Equal-Interval）得到的特征具有更好的区分性. 一般流程是对特征做排序－> 选择合适的分割点－> 作出对整体的分割 －> 查看分割是否合理，是否能够达到停止条件
     4. 二值化
     5. 特征交叉, 比如特征 (女性, 八卦新闻点击率) $$\in (0,1)$$
     6. 缺省值处理, 如单独表示, 众数, 平均值
 5. 特征降维, PCA, LDA
-6. 特征选择
+6. 特征选择 (按选择方法)
     1. 过滤 (filter): 可以通过相关系数 (correlation coefficient) 来评估特征 X 和 Y 是否线性相关 $$\rho_{X,Y} = cov(X,Y)/(\sigma_X \sigma_Y) \in [-1,1]$$, 如果 $$\rho_{XY} > 0$$ 说明线性相关, 如果 $$\rho_{XY} < 0$$ 则是线性反相关, 如果 $$\rho_{XY} = 0$$ 也只是说明两个变量是线性无关的, 并不能推出它们之间是独立的.
     2. 包装 (wrapper), 先选定一种评估模型的指标如 Area Under Curve / Mean Absolute Error/ Mean Square Error, 通过[前|后]项特征选择或者, 有[空|满]特征集开始, 每次[增加|剔除]一个能让模型提升最[快|慢]的特征. 或者用增 L 去 R 算法（Plus-L Minus-R Selection ($$L < R $$)
     3. 嵌入 (embedding), 如 RF, Logistic Regression 的一些算法，可以参考 TG（Truncated Gradient Algorithm），FOBOS（Forward and Backward Splitting），RDA（Regularized Dual Averaging Algorithm）， FTRL（Follow-the-Regularized-Leader Algorithm） 算法 [Ad Click Prediction: a View from the Trenches](https://www.eecs.tufts.edu/~dsculley/papers/ad-click-prediction.pdf)
-    4. 完全搜索(Complete)
+7. 特征选择 (按搜索方法)
+    1. 完全搜索(Complete)
         * 广度优先搜索( Breadth First Search ) 广度优先遍历特征子空间。枚举所有组合，穷举搜索，实用性不高。
         * 分支限界搜索( Branch and Bound ) 穷举基础上加入分支限界。例如：剪掉某些不可能搜索出比当前最优解更优的分支。 
         * 其他，如定向搜索 (Beam Search )，最优优先搜索 ( Best First Search )等
-    5. 启发式搜索(Heuristic)
+    2. 启发式搜索(Heuristic)
         * 序列前向选择( SFS ， Sequential Forward Selection ) 从空集开始，每次加入一个选最优。
         * 序列后向选择( SBS ， Sequential Backward Selection ) 从全集开始，每次减少一个选最优。
         * 增L去R选择算法 ( LRS ， Plus-L Minus-R Selection ) 从空集开始，每次加入L个，减去R个，选最优（L>R)或者从全集开始，每次减去R个，增加L个，选最优(L<R)。
         * 其他如双向搜索( BDS ， Bidirectional Search )，序列浮动选择( Sequential Floating Selection )等
-    6. 随机搜索(Random)
+    3. 随机搜索(Random)
         * 随机产生序列选择算法(RGSS， Random Generation plus Sequential Selection) 随机产生一个特征子集，然后在该子集上执行SFS与SBS算法
         * 模拟退火算法( SA， Simulated Annealing ) 以一定的概率来接受一个比当前解要差的解，而且这个概率随着时间推移逐渐降低
         * 遗传算法( GA， Genetic Algorithms ) 通过交叉、突变等操作繁殖出下一代特征子集，并且评分越高的特征子集被选中参加繁殖的概率越高
